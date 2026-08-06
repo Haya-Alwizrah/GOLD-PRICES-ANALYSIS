@@ -12,7 +12,7 @@ class GoldPricePredictor:
         self.y_test = None
         self.y_pred = None
 
-    def train(self, X_train, y_train, lr=0.001, validation_split=0.2, epochs=200, batch_size=32):
+    def train(self, X_train, y_train, lr=0.001, validation_split=0.2, epochs=200, batch_size=32, es_patience=20):
 
         self.features = X_train.columns.tolist()
 
@@ -34,7 +34,7 @@ class GoldPricePredictor:
 
         early_stop = tf.keras.callbacks.EarlyStopping(
             monitor = "val_loss",
-            patience = 20,
+            patience = es_patience,
             restore_best_weights = True
         )
 
