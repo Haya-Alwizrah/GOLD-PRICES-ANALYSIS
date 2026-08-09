@@ -66,6 +66,15 @@ class GoldPricePredictor:
         print("R²   :", r2)
 
         plt.figure(figsize=(14, 6))
+        plt.plot(self.history_train["loss"], label="Training Loss")
+        plt.plot(self.history_train["val_loss"], label="Validation Loss")
+        plt.xlabel("Epoch")
+        plt.ylabel("MSE Loss")
+        plt.title("ANN Training vs Validation Loss")
+        plt.legend()
+        plt.show()
+
+        plt.figure(figsize=(14, 6))
         plt.plot(self.y_test.values, label="Actual")
         plt.plot(self.y_pred, label="Prediction")
         plt.xlabel("Samples")
