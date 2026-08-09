@@ -12,7 +12,7 @@ class GoldPricePredictor:
         self.y_test = None
         self.y_pred = None
 
-    def train(self, X_train, y_train, lr=0.001, validation_split=0.2, epochs=200, batch_size=32, es_patience=20):
+    def train(self, X_train, y_train, lr=0.001, validation_split=0.2, epochs=200, batch_size=32, es_patience=10):
 
         self.features = X_train.columns.tolist()
 
