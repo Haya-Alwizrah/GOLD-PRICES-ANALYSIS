@@ -125,18 +125,14 @@ class DirectGoldPredictor:
         self.history = history.history
         return history
 
-    def evaluate(self, X_test, y_test, scaler_y=None):
+    def evaluate(self, X_test, y_test):
         if self.model is None:
             raise ValueError("Model has not been trained.")
 
         y_pred = self.model.predict(X_test, verbose=0).flatten()
 
-        if scaler_y is not None:
-            y_test_original = scaler_y.inverse_transform(np.array(y_test).reshape(-1, 1)).ravel()
-            y_pred_original = scaler_y.inverse_transform(y_pred.reshape(-1, 1)).ravel()
-        else:
-            y_test_original = np.asarray(y_test)
-            y_pred_original = y_pred
+        y_test_original = np.asarray(y_test)
+        y_pred_original = y_pred
 
         self.y_test = y_test_original
         self.y_pred = y_pred_original
@@ -166,17 +162,12 @@ class DirectGoldPredictor:
             "R2": r2
         }
 
-    def predict_after_21_days(self, latest_data, scaler_X, scaler_y, current_price):
+    def predict_after_21_days(self, latest_data, scaler_X, current_price):
         X_current = pd.DataFrame([[latest_data[feature] for feature in self.features]], columns=self.features)
         X_current_scaled = scaler_X.transform(X_current)
 
-        # Predict scaled price
-        predicted_scaled = self.model.predict(X_current_scaled, verbose=0).ravel()[0]
+        predicted_price = self.model.predict(X_current_scaled, verbose=0).ravel()[0]
 
-        # Convert back to original gold price
-        predicted_price = scaler_y.inverse_transform([[predicted_scaled]])[0][0]
-
-        # Convert Troy ounce -> gram
         current_24k = current_price / self.TROY_OUNCE_GRAMS
         predicted_24k =  predicted_price / self.TROY_OUNCE_GRAMS
 

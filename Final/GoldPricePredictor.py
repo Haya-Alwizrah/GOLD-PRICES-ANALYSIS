@@ -105,22 +105,21 @@ class GoldPricePredictor:
             patience=patience
         )
 
-    def evaluate_recursive(self, X_test, y_test, scaler_y=None):
-        result = self.recursive_model.evaluate(X_test, y_test, scaler_y)
+    def evaluate_recursive(self, X_test, y_test):
+        result = self.recursive_model.evaluate(X_test, y_test)
         self.results["recursive"] = result
         return result
 
-    def evaluate_direct(self, X_test, y_test, scaler_y=None):
-        result = self.direct_model.evaluate(X_test, y_test, scaler_y)
+    def evaluate_direct(self, X_test, y_test):
+        result = self.direct_model.evaluate(X_test, y_test)
         self.results["direct"] = result
         return result
 
-    def predict_recursive(self, latest_data, historical_data, scaler_X, scaler_y, days=21):
+    def predict_recursive(self, latest_data, historical_data, scaler_X, days=21):
         return self.recursive_model.forecast(
             latest_data=latest_data,
             historical_data=historical_data,
             scaler_X=scaler_X,
-            scaler_y=scaler_y,
             days=days
         )
 

@@ -126,15 +126,11 @@ class RecursiveGoldPredictor:
         self.history_train = history.history
         return history
 
-    def evaluate(self, X_test, y_test, scaler_y=None):
+    def evaluate(self, X_test, y_test):
         y_pred = self.model.predict(X_test, verbose=0).flatten()
 
-        if scaler_y is not None:
-            y_test_original = scaler_y.inverse_transform(np.asarray(y_test).reshape(-1, 1)).ravel()
-            y_pred_original = scaler_y.inverse_transform(y_pred.reshape(-1, 1)).ravel()
-        else:
-            y_test_original = np.asarray(y_test)
-            y_pred_original = y_pred
+        y_test_original = np.asarray(y_test)
+        y_pred_original = y_pred
     
         self.y_test = y_test_original
         self.y_pred = y_pred_original
@@ -169,7 +165,7 @@ class RecursiveGoldPredictor:
     def load(self, model_path):
         self.model = tf.keras.models.load_model(model_path)
 
-    def forecast(self, latest_data, historical_data, scaler_X, scaler_y, days=30):
+    def forecast(self, latest_data, historical_data, scaler_X, days=30):
 
         # 1. Prepare historical Gold prices
         price_history = historical_data["Gold_Close"].tolist()
@@ -202,7 +198,6 @@ class RecursiveGoldPredictor:
 
             # Predict next day's Gold Close
             next_price = self.model.predict( X_current_scaled, verbose=0)[0][0]
-            next_price = scaler_y.inverse_transform([[next_price]])[0][0]
             predictions.append(next_price)
             price_history.append(next_price)
 
