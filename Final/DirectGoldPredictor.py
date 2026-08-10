@@ -4,6 +4,10 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
+SEED = 42
+tf.random.set_seed(SEED)
+np.random.seed(SEED)
+
 class DirectGoldPredictor:
     TROY_OUNCE_GRAMS = 31.1034768
     def __init__(self):

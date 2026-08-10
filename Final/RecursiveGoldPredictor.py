@@ -4,6 +4,10 @@ import tensorflow as tf
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import matplotlib.pyplot as plt
 
+SEED = 42
+tf.random.set_seed(SEED)
+np.random.seed(SEED)
+
 class RecursiveGoldPredictor:
     def __init__(self):
         self.model = None
@@ -172,6 +176,7 @@ class RecursiveGoldPredictor:
         current = latest_data.copy()
 
         # 2. Recursive forecasting
+        last_date = pd.to_datetime(latest_data.name)
         predictions = []
         for i in range(days):
 
@@ -259,7 +264,6 @@ class RecursiveGoldPredictor:
             current["VIX"] = latest_data["VIX"]
 
         # 3. Create forecast dates
-        last_date = pd.to_datetime(latest_data.name)
         forecast_dates = pd.bdate_range(
             start=last_date + pd.Timedelta(days=1),
             periods=days

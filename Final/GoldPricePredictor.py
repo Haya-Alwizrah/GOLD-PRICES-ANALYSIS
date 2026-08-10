@@ -9,6 +9,10 @@ from tensorflow.keras import layers, regularizers, callbacks
 from RecursiveGoldPredictor import RecursiveGoldPredictor
 from DirectGoldPredictor import DirectGoldPredictor
 
+SEED = 42
+tf.random.set_seed(SEED)
+np.random.seed(SEED)
+
 class GoldPricePredictor:
     def __init__(self):
         self.recursive_model = RecursiveGoldPredictor()
@@ -111,12 +115,12 @@ class GoldPricePredictor:
         self.results["recursive"] = result
         return result
 
-    def evaluate_direct(self, X_test, y_test):
-        result = self.direct_model.evaluate(X_test, y_test)
+    def evaluate_direct(self, X_test, y_test, scaler_y=None):
+        result = self.direct_model.evaluate(X_test, y_test, scaler_y)
         self.results["direct"] = result
         return result
 
-    def forecast_recursive(self, latest_data, historical_data, scaler, days=21):
+    def predict_recursive(self, latest_data, historical_data, scaler, days=21):
         return self.recursive_model.forecast(
             latest_data=latest_data,
             historical_data=historical_data,
@@ -125,7 +129,6 @@ class GoldPricePredictor:
         )
 
     def predict_direct(self, latest_data, X_columns, scaler):
-
         return self.direct_model.predict(
             latest_data=latest_data,
             X_columns=X_columns,
