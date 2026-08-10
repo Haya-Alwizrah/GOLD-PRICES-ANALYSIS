@@ -34,9 +34,9 @@ class RecursiveGoldPredictor:
 
         return model
     
-    def tune(self, X_train, y_train, X_val, y_val, configs, epochs=80, batch_size=32, patience=10):
+    def tune(self, X_train, y_train, X_val, y_val, configs, features=None, epochs=80, batch_size=32, patience=10):
 
-        self.features = X_train.columns.tolist()
+        self.features = features
         self.tuning_results = []
 
         for i, config in enumerate(configs):
@@ -74,9 +74,9 @@ class RecursiveGoldPredictor:
 
         return self.best_config
 
-    def train(self, X_train, y_train, X_val, y_val, configs, best_config=None, epochs=300, batch_size=32, patience=20):
+    def train(self, X_train, y_train, X_val, y_val, configs, features=None, best_config=None, epochs=300, batch_size=32, patience=20):
 
-        self.features = X_train.columns.tolist()
+        self.features = features
         if best_config is None:
             if self.best_config is None:
                 self.tune(X_train, y_train, X_val, y_val, configs, epochs, batch_size, patience)
@@ -122,18 +122,22 @@ class RecursiveGoldPredictor:
         self.history_train = history.history
         return history
 
-    def evaluate(self, X_test, y_test):
-        if self.model is None:
-            raise ValueError("Model has not been trained.")
-
+    def evaluate(self, X_test, y_test, scaler_y=None):
         y_pred = self.model.predict(X_test, verbose=0).flatten()
 
-        self.y_test = y_test
-        self.y_pred = y_pred
+        if scaler_y is not None:
+            y_test_original = scaler_y.inverse_transform(np.asarray(y_test).reshape(-1, 1)).ravel()
+            y_pred_original = scaler_y.inverse_transform(y_pred.reshape(-1, 1)).ravel()
+        else:
+            y_test_original = np.asarray(y_test)
+            y_pred_original = y_pred
+    
+        self.y_test = y_test_original
+        self.y_pred = y_pred_original
 
-        rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-        mae = mean_absolute_error(y_test, y_pred)
-        r2 = r2_score(y_test, y_pred)
+        rmse = np.sqrt(mean_squared_error(y_test_original, y_pred_original))
+        mae = mean_absolute_error(y_test_original, y_pred_original)
+        r2 = r2_score(y_test_original, y_pred_original)
 
         print("\nRecursive Model Results")
         print(f"RMSE : {rmse:.3f}")
@@ -147,16 +151,6 @@ class RecursiveGoldPredictor:
         plt.ylabel("MSE Loss")
         plt.title("ANN Training vs Validation Loss")
         plt.legend()
-        plt.show()
-
-        plt.figure(figsize=(14, 6))
-        plt.plot(self.y_test.values, label="Actual")
-        plt.plot(self.y_pred, label="Prediction")
-        plt.xlabel("Samples")
-        plt.ylabel("Gold Price")
-        plt.title("Actual vs Predicted Gold Prices")
-        plt.legend()
-        plt.grid(True)
         plt.show()
         
         return {

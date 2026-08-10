@@ -34,9 +34,9 @@ class DirectGoldPredictor:
 
         return model
 
-    def tune(self, X_train, y_train, X_val, y_val, configs, epochs=80, batch_size=32, patience=10):
+    def tune(self, X_train, y_train, X_val, y_val, configs, features=None, epochs=80, batch_size=32, patience=10):
     
-        self.features = X_train.columns.tolist()
+        self.features = features
         self.tuning_results = []
 
         for i, config in enumerate(configs):
@@ -74,9 +74,9 @@ class DirectGoldPredictor:
 
         return self.best_config
 
-    def train(self, X_train, y_train, X_val, y_val, configs, best_config=None, epochs=300, batch_size=32, patience=20):
+    def train(self, X_train, y_train, X_val, y_val, configs, features=None, best_config=None, epochs=300, batch_size=32, patience=20):
 
-        self.features = X_train.columns.tolist()
+        self.features = features
         if best_config is None:
             if self.best_config is None:
                 self.tune(X_train, y_train, X_val, y_val, configs, epochs, batch_size, patience)
@@ -152,16 +152,6 @@ class DirectGoldPredictor:
         plt.xlabel("Epoch")
         plt.ylabel("MAE")
         plt.title("Direct Model Training History")
-        plt.legend()
-        plt.grid(True)
-        plt.show()
-
-        plt.figure(figsize=(11, 4))
-        plt.plot(self.y_test,label="Actual")
-        plt.plot(self.y_pred,label="Direct Prediction")
-        plt.xlabel("Samples")
-        plt.ylabel("Gold Price")
-        plt.title("Actual vs Direct Predicted Gold Price")
         plt.legend()
         plt.grid(True)
         plt.show()

@@ -16,7 +16,47 @@ class GoldPricePredictor:
 
         self.results = {}
 
-    def train_recursive(self, X_train, y_train, X_val, y_val, configs, epochs=300, batch_size=32, tune_epochs=80, tune_patience=10, patience=20):
+        self.configs = [
+            dict(
+                units1=64,
+                units2=32,
+                units3=16,
+                dropout1=0.2,
+                dropout2=0.1,
+                l2reg=1e-4,
+                lr=1e-3
+            ),
+            dict(
+                units1=128,
+                units2=64,
+                units3=32,
+                dropout1=0.3,
+                dropout2=0.2,
+                l2reg=1e-3,
+                lr=1e-3
+            ),
+            dict(
+                units1=128,
+                units2=64,
+                units3=32,
+                dropout1=0.4,
+                dropout2=0.3,
+                l2reg=1e-3,
+                lr=5e-4
+            ),
+            dict(
+                units1=256,
+                units2=128,
+                units3=64,
+                dropout1=0.4,
+                dropout2=0.3,
+                l2reg=1e-2,
+                lr=1e-3
+            )
+        ]
+
+
+    def train_recursive(self, X_train, y_train, X_val, y_val, epochs=300, batch_size=32, tune_epochs=80, tune_patience=10, patience=20):
         print("--------- Training Recursive Model --------------")
 
         self.recursive_model.tune(
@@ -24,7 +64,7 @@ class GoldPricePredictor:
             y_train=y_train,
             X_val=X_val,
             y_val=y_val,
-            configs=configs,
+            configs=self.configs,
             epochs=tune_epochs,
             batch_size=batch_size,
             patience=tune_patience
@@ -35,13 +75,13 @@ class GoldPricePredictor:
             y_train=y_train,
             X_val=X_val,
             y_val=y_val,
-            configs=configs,
+            configs=self.configs,
             epochs=epochs,
             batch_size=batch_size,
             patience=patience
         )
 
-    def train_direct(self, X_train, y_train, X_val, y_val, configs, epochs=300, batch_size=32, tune_epochs=80, tune_patience=10, patience=20):
+    def train_direct(self, X_train, y_train, X_val, y_val, epochs=300, batch_size=32, tune_epochs=80, tune_patience=10, patience=20):
         print(" ------------ Training Direct Model---------- ")
 
         self.direct_model.tune(
@@ -49,7 +89,7 @@ class GoldPricePredictor:
             y_train=y_train,
             X_val=X_val,
             y_val=y_val,
-            configs=configs,
+            configs=self.configs,
             epochs=tune_epochs,
             batch_size=batch_size,
             patience=tune_patience
@@ -60,14 +100,14 @@ class GoldPricePredictor:
             y_train=y_train,
             X_val=X_val,
             y_val=y_val,
-            configs=configs,
+            configs=self.configs,
             epochs=epochs,
             batch_size=batch_size,
             patience=patience
         )
 
-    def evaluate_recursive(self, X_test, y_test):
-        result = self.recursive_model.evaluate(X_test, y_test)
+    def evaluate_recursive(self, X_test, y_test, scaler_y=None):
+        result = self.recursive_model.evaluate(X_test, y_test, scaler_y)
         self.results["recursive"] = result
         return result
 
