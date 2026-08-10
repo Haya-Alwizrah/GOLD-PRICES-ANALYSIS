@@ -177,7 +177,10 @@ class RecursiveGoldPredictor:
 
         # 2. Recursive forecasting
         last_date = pd.to_datetime(latest_data.name)
+
+        forecast_dates = []
         predictions = []
+
         for i in range(days):
 
             # Date of the day we are predicting
@@ -262,12 +265,6 @@ class RecursiveGoldPredictor:
             current["SP500"] = latest_data["SP500"]
             current["Oil"] = latest_data["Oil"]
             current["VIX"] = latest_data["VIX"]
-
-        # 3. Create forecast dates
-        forecast_dates = pd.bdate_range(
-            start=last_date + pd.Timedelta(days=1),
-            periods=days
-        )
 
         forecast_df = pd.DataFrame({
             "Date": forecast_dates,
