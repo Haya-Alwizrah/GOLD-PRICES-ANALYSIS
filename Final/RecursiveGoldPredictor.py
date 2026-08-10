@@ -84,7 +84,6 @@ class RecursiveGoldPredictor:
             best_config = self.best_config
 
         self.best_config = best_config
-
         tf.keras.backend.clear_session()
 
         self.model = self._build_model(input_shape=X_train.shape[1], **best_config)
