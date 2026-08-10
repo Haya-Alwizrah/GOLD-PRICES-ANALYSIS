@@ -1,10 +1,5 @@
 import numpy as np
-import pandas as pd
 import tensorflow as tf
-import matplotlib.pyplot as plt
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-from tensorflow.keras import layers, regularizers, callbacks
 
 from RecursiveGoldPredictor import RecursiveGoldPredictor
 from DirectGoldPredictor import DirectGoldPredictor
@@ -120,11 +115,12 @@ class GoldPricePredictor:
         self.results["direct"] = result
         return result
 
-    def predict_recursive(self, latest_data, historical_data, scaler, days=21):
+    def predict_recursive(self, latest_data, historical_data, scaler_X, scaler_y, days=21):
         return self.recursive_model.forecast(
             latest_data=latest_data,
             historical_data=historical_data,
-            scaler=scaler,
+            scaler_X=scaler_X,
+            scaler_y=scaler_y,
             days=days
         )
 

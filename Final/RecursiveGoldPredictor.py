@@ -169,7 +169,7 @@ class RecursiveGoldPredictor:
     def load(self, model_path):
         self.model = tf.keras.models.load_model(model_path)
 
-    def forecast(self, latest_data, historical_data, scaler, days=30):
+    def forecast(self, latest_data, historical_data, scaler_X, scaler_y, days=30):
 
         # 1. Prepare historical Gold prices
         price_history = historical_data["Gold_Close"].tolist()
@@ -198,10 +198,11 @@ class RecursiveGoldPredictor:
 
             # Prepare current input
             X_current = pd.DataFrame([[current[feature] for feature in self.features]],columns=self.features)
-            X_current_scaled = scaler.transform(X_current)
+            X_current_scaled = scaler_X.transform(X_current)
 
             # Predict next day's Gold Close
             next_price = self.model.predict( X_current_scaled, verbose=0)[0][0]
+            next_price = scaler_y.inverse_transform([[next_price]])[0][0]
             predictions.append(next_price)
             price_history.append(next_price)
 
@@ -275,12 +276,15 @@ class RecursiveGoldPredictor:
         min_row = forecast_df.loc[forecast_df["Predicted_Close"].idxmin()]
         max_row = forecast_df.loc[forecast_df["Predicted_Close"].idxmax()]
 
+        lowest_24k = min_row["Predicted_Close"] / 31.1034768
+        highest_24k = max_row["Predicted_Close"] / 31.1034768
+
         # 5. Print results
         print(f"{days}-Day Gold Price Forecast")
-        print(f"Lowest predicted price : {min_row['Predicted_Close']:.2f}")
-        print(f"Lowest price date      : {min_row['Date'].date()}")
+        print(f"Lowest predicted 24K price : {lowest_24k:.2f}")
+        print(f"Lowest price date          : {min_row['Date'].date()}")
 
-        print(f"Highest predicted price: {max_row['Predicted_Close']:.2f}")
-        print(f"Highest price date     : {max_row['Date'].date()}")
+        print(f"Highest predicted 24K price: {highest_24k:.2f}")
+        print(f"Highest price date         : {max_row['Date'].date()}")
 
         return forecast_df
