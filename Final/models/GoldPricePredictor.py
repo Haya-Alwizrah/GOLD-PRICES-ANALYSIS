@@ -1,5 +1,5 @@
-from Final.models.RecursiveGoldPredictor import RecursiveGoldPredictor
-from Final.models.DirectGoldPredictor import DirectGoldPredictor
+from models.RecursiveGoldPredictor import RecursiveGoldPredictor
+from models.DirectGoldPredictor import DirectGoldPredictor
 
 class GoldPricePredictor:
     CONFIGS = [
@@ -104,13 +104,13 @@ class GoldPricePredictor:
         )
     
 # ----------------------------------------------------------------------------
-    def load_models(self, recursive_path="recursive_gold_model.keras", direct_path="direct_gold_model.keras"):
+    def load_models(self, recursive_path="artifacts/recursive_gold_model.keras", direct_path="artifacts/direct_gold_model.keras"):
         self.recursive_model.load(recursive_path)
         self.direct_model.load(direct_path)
         print("Models loaded successfully.")
 
 
-    def save_models(self, recursive_path="recursive_gold_model.keras", direct_path="direct_gold_model.keras"):
+    def save_models(self, recursive_path="artifacts/recursive_gold_model.keras", direct_path="artifacts/direct_gold_model.keras"):
         self.recursive_model.save(recursive_path)
         self.direct_model.save(direct_path)
 
