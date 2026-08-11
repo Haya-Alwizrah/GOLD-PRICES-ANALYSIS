@@ -94,7 +94,7 @@ class BaseGoldPredictor:
             ),
 
             tf.keras.callbacks.ModelCheckpoint(
-                f"best_{self.model_name.lower().replace(' ', '_')}_gold_model.keras",
+                f"checkpoints/best_{self.model_name.lower().replace(' ', '_')}_gold_model.keras",
                 monitor="val_loss",
                 save_best_only=True
             ),
