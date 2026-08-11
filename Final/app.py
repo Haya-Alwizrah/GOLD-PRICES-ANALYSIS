@@ -271,12 +271,29 @@ if "result" in st.session_state:
     min_row = recursive_df.loc[recursive_df["Predicted_Close"].idxmin()]
     max_row = recursive_df.loc[recursive_df["Predicted_Close"].idxmax()]
 
-    lowest_price_usd_gram =  min_row["Predicted_Close"] / TROY_OUNCE_GRAMS
-    highest_price_usd_gram = max_row["Predicted_Close"] / TROY_OUNCE_GRAMS
+    lowest_24k_usd =  min_row["Predicted_Close"] / TROY_OUNCE_GRAMS
+    highest_24k_usd  = max_row["Predicted_Close"] / TROY_OUNCE_GRAMS
+
+    # 21K
+    lowest_21k_usd = lowest_24k_usd * 21 / 24
+    highest_21k_usd = highest_24k_usd * 21 / 24
+
+    # 18K
+    lowest_18k_usd = lowest_24k_usd * 18 / 24
+    highest_18k_usd = highest_24k_usd * 18 / 24
+
+    # Convert USD -> SAR
+    lowest_24k = lowest_24k_usd * USD_TO_SAR
+    highest_24k = highest_24k_usd * USD_TO_SAR
+
+    lowest_21k = lowest_21k_usd * USD_TO_SAR
+    highest_21k = highest_21k_usd * USD_TO_SAR
+
+    lowest_18k = lowest_18k_usd * USD_TO_SAR
+    highest_18k = highest_18k_usd * USD_TO_SAR
 
     lowest_date = pd.to_datetime(min_row["Date"]).date()
     highest_date = pd.to_datetime(max_row["Date"]).date()
-
 
     # Direct Result
     current_price_usd = direct["current_24k"]
@@ -286,13 +303,7 @@ if "result" in st.session_state:
     change = direct["pct_change"]
     signal = direct["signal"]
 
-    lowest_price = lowest_price_usd_gram * USD_TO_SAR
-    highest_price = highest_price_usd_gram * USD_TO_SAR
-
     current_price = current_price_usd * USD_TO_SAR
-    predicted_24k = predicted_24k_usd * USD_TO_SAR
-    predicted_21k = predicted_21k_usd * USD_TO_SAR
-    predicted_18k = predicted_18k_usd * USD_TO_SAR
 
     # Recursive Forecast
     st.markdown(
@@ -301,329 +312,113 @@ if "result" in st.session_state:
         f'</div>',
         unsafe_allow_html=True
     )
-    c1, c2 = st.columns(2)
+    c1, c2, c3 = st.columns(3)
 
-    # Lowest Price
+    # 24K
     with c1:
         st.markdown(
             f"""
             <div class="metric-card">
-                <div class="metric-title">
-                    Lowest Predicted 24K Price
-                </div>
-                <div class="metric-value">
-                    SAR {lowest_price:,.2f}
-                </div>
-                <div class="metric-date">
-                    {lowest_date}
-                </div>
+                <div class="metric-title">24K Gold</div>
+                <div class="metric-value">SAR {lowest_24k:,.2f}</div>
+                <div class="metric-date">Lowest · {lowest_date}</div>
+                <br>
+                <div class="metric-value">SAR {highest_24k:,.2f}</div>
+                <div class="metric-date">Highest · {highest_date}</div>
             </div>
             """,
             unsafe_allow_html=True
         )
 
-    # Highest Price
+    # 21K
     with c2:
-
         st.markdown(
             f"""
             <div class="metric-card">
-
-                <div class="metric-title">
-                    Highest Predicted 24K Price
-                </div>
-
-                <div class="metric-value">
-                    SAR {highest_price:,.2f}
-                </div>
-
-                <div class="metric-date">
-                    {highest_date}
-                </div>
-
+                <div class="metric-title">21K Gold</div>
+                <div class="metric-value">SAR {lowest_21k:,.2f}</div>
+                <div class="metric-date">Lowest · {lowest_date}</div>
+                <br>
+                <div class="metric-value">SAR {highest_21k:,.2f}</div>
+                <div class="metric-date">Highest · {highest_date}</div>
             </div>
             """,
             unsafe_allow_html=True
         )
 
+    # 18K
+    with c3:
+        st.markdown(
+            f"""
+            <div class="metric-card">
+                <div class="metric-title">18K Gold</div>
+                <div class="metric-value">SAR {lowest_18k:,.2f}</div>
+                <div class="metric-date">Lowest · {lowest_date}</div>
+                <br>
+                <div class="metric-value">SAR {highest_18k:,.2f}</div>
+                <div class="metric-date">Highest · {highest_date}</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-    # ========================================================
     # Forecast Chart
-    # ========================================================
-
     st.markdown(
         '<div class="section-title">Forecast Trend</div>',
         unsafe_allow_html=True
     )
-
-
     chart_df = recursive_df.copy()
-
     chart_df["Date"] = pd.to_datetime(
         chart_df["Date"]
     )
 
-
-    # Convert USD / ounce
-    # -> USD / gram
-    # -> SAR / gram
-
-    chart_df["Predicted_24K_SAR"] = (
-        chart_df["Predicted_Close"]
-        / TROY_OUNCE_GRAMS
-        * USD_TO_SAR
-    )
-
-
+    chart_df["Predicted_24K_SAR"] = chart_df["Predicted_Close"] / TROY_OUNCE_GRAMS * USD_TO_SAR
     fig, ax = plt.subplots(
         figsize=(12, 4)
     )
-
-
     ax.plot(
         chart_df["Date"],
         chart_df["Predicted_24K_SAR"],
         linewidth=2
     )
-
-
     ax.set_xlabel("Date")
-
-    ax.set_ylabel(
-        "SAR / gram"
-    )
-
-    ax.set_title(
-        f"{days}-Day Recursive Gold Forecast"
-    )
-
-    ax.grid(
-        alpha=0.2
-    )
-
-
-    plt.xticks(
-        rotation=45
-    )
-
+    ax.set_ylabel("SAR / gram")
+    ax.set_title(f"{days}-Day Recursive Gold Forecast")
+    ax.grid(alpha=0.2)
+    plt.xticks(rotation=45)
     plt.tight_layout()
-
-
-    st.pyplot(
-        fig,
-        use_container_width=True
-    )
-
-
+    st.pyplot(fig, use_container_width=True)
     plt.close(fig)
 
-
-    # ========================================================
     # Forecast Table
-    # ========================================================
-
     with st.expander("View Forecast Data"):
+        display_df = chart_df[[
+            "Date",
+            "Predicted_24K_SAR"
+        ]].copy()
 
-        display_df = chart_df[
-            [
-                "Date",
-                "Predicted_24K_SAR"
-            ]
-        ].copy()
-
-        display_df["Predicted_24K_SAR"] = (
-            display_df["Predicted_24K_SAR"]
-            .round(2)
-        )
-
+        display_df["Predicted_24K_SAR"] = display_df["Predicted_24K_SAR"].round(2)
         display_df = display_df.rename(
             columns={
                 "Date": "Date",
-                "Predicted_24K_SAR":
-                    "Predicted 24K (SAR/g)"
+                "Predicted_24K_SAR": "Predicted 24K (SAR/g)"
             }
         )
 
-        st.dataframe(
-            display_df,
-            use_container_width=True,
-            hide_index=True
-        )
+        st.dataframe(display_df, use_container_width=True, hide_index=True)
 
-
-    # ========================================================
-    # Current Price
-    # ========================================================
-
-    st.markdown(
-        '<div class="section-title">'
-        'Current Gold Price'
-        '</div>',
-        unsafe_allow_html=True
-    )
-
-
-    st.markdown(
-        f"""
-        <div class="current-price">
-
-            <div class="current-label">
-                Current 24K Gold Price
-            </div>
-
-            <div class="current-value">
-                SAR {current_price:,.2f}
-            </div>
-
-            <div class="current-unit">
-                per gram
-            </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-
-    # ========================================================
     # Direct Forecast
-    # ========================================================
-
-    st.markdown(
-        '<div class="section-title">'
-        'Direct Gold Price Forecast'
-        '</div>',
-        unsafe_allow_html=True
-    )
-
-
-    p1, p2, p3 = st.columns(3)
-
-
-    # --------------------------------------------------------
-    # 24K
-    # --------------------------------------------------------
-
-    with p1:
-
-        st.markdown(
-            f"""
-            <div class="prediction-card">
-
-                <div class="karat">
-                    24K Gold
-                </div>
-
-                <div class="prediction-price">
-                    SAR {predicted_24k:,.2f}
-                </div>
-
-                <div class="metric-date">
-                    per gram
-                </div>
-
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-
-    # --------------------------------------------------------
-    # 21K
-    # --------------------------------------------------------
-
-    with p2:
-
-        st.markdown(
-            f"""
-            <div class="prediction-card">
-
-                <div class="karat">
-                    21K Gold
-                </div>
-
-                <div class="prediction-price">
-                    SAR {predicted_21k:,.2f}
-                </div>
-
-                <div class="metric-date">
-                    per gram
-                </div>
-
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-
-    # --------------------------------------------------------
-    # 18K
-    # --------------------------------------------------------
-
-    with p3:
-
-        st.markdown(
-            f"""
-            <div class="prediction-card">
-
-                <div class="karat">
-                    18K Gold
-                </div>
-
-                <div class="prediction-price">
-                    SAR {predicted_18k:,.2f}
-                </div>
-
-                <div class="metric-date">
-                    per gram
-                </div>
-
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-
-    # ========================================================
     # Expected Change
-    # ========================================================
-
-    st.markdown(
-        '<div class="section-title">'
-        'Market Signal'
-        '</div>',
-        unsafe_allow_html=True
-    )
-
-
+    st.markdown('<div class="section-title">''Market Signal''</div>', unsafe_allow_html=True)
     st.markdown(
         f"""
         <div class="signal-card">
-
-            <div class="signal-title">
-                Expected Change: {change:+.2f}%
-            </div>
-
-            <div class="signal-text">
-                {signal}
-            </div>
-
+            <div class="signal-title">Expected Change: {change:+.2f}%</div>
+            <div class="signal-text">{signal}</div>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-
-# ============================================================
 # Footer
-# ============================================================
-
-st.markdown(
-    """
-    <div class="footer">
-        Gold Price Forecasting System
-        · Prices displayed in SAR per gram
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+st.markdown("""<div class="footer">Gold Price Forecasting System · Prices displayed in SAR per gram</div>""", unsafe_allow_html=True)
