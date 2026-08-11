@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-
+import pickle
 SEED = 42
 tf.random.set_seed(SEED)
 np.random.seed(SEED)
@@ -118,6 +118,11 @@ class BaseGoldPredictor:
         )
 
         self.history = history.history
+
+        history_path = (f"checkpoints/{self.model_name.lower().replace(' ', '_')}_history.pkl")
+        with open(history_path, "wb") as f:
+            pickle.dump(self.history, f)
+
         return history
 
     def evaluate(self, X_test, y_test):

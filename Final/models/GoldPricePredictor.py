@@ -1,5 +1,7 @@
+import pandas as pd
 from models.RecursiveGoldPredictor import RecursiveGoldPredictor
 from models.DirectGoldPredictor import DirectGoldPredictor
+from pathlib import Path
 
 class GoldPricePredictor:
     CONFIGS = [
@@ -46,7 +48,15 @@ class GoldPricePredictor:
         self.direct_model = DirectGoldPredictor()
 
 # ---------------------------------------------------------------------------
-    def train_model(self, model, X_train, y_train, X_val, y_val, epochs=300, batch_size=32, tune_epochs=80, tune_patience=10, patience=20):
+    def train_model(self, model, model_path, X_train, y_train, X_val, y_val, epochs=300, batch_size=32, tune_epochs=80, tune_patience=10, patience=20):
+
+        if Path(model_path).exists():
+            print(f"Loading {model_path}")
+            model.load(model_path)
+            return
+
+        print(f"Training {model_path}")
+
         model.tune(
             X_train=X_train,
             y_train=y_train,
@@ -71,11 +81,11 @@ class GoldPricePredictor:
 
     def train_recursive(self, *args, **kwargs):
         print("Training Recursive Model")
-        self.train_model(self.recursive_model, *args, **kwargs)
+        self.train_model(self.recursive_model, "artifacts/recursive_gold_model.keras", *args, **kwargs)
 
     def train_direct(self, *args, **kwargs):
         print("Training Direct Model")
-        self.train_model(self.direct_model, *args, **kwargs)
+        self.train_model(self.direct_model, "artifacts/direct_gold_model.keras", *args, **kwargs)
 
 # ----------------------------------------------------------------------------
 
@@ -102,6 +112,27 @@ class GoldPricePredictor:
             scaler_X=scaler_X,
             current_price=current_price
         )
+
+    def predict_gold(self, date, df, scaler_X):
+        row = df.loc[pd.to_datetime(date)]
+
+        recursive_result = self.predict_recursive(
+            latest_data=row,
+            historical_data=df.loc[:date],
+            scaler_X=scaler_X,
+            days=21
+        )
+
+        direct_result = self.predict_direct(
+            latest_data=row,
+            scaler_X=scaler_X,
+            current_price=row["Gold_Close"]
+        )
+
+        return {
+            "recursive": recursive_result,
+            "direct": direct_result
+        }
     
 # ----------------------------------------------------------------------------
     def load_models(self, recursive_path="artifacts/recursive_gold_model.keras", direct_path="artifacts/direct_gold_model.keras"):
