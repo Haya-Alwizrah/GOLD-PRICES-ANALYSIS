@@ -2,6 +2,8 @@ import pandas as pd
 from models.RecursiveGoldPredictor import RecursiveGoldPredictor
 from models.DirectGoldPredictor import DirectGoldPredictor
 from pathlib import Path
+import joblib
+import numpy as np
 
 class GoldPricePredictor:
     CONFIGS = [
@@ -46,6 +48,11 @@ class GoldPricePredictor:
     def __init__(self):
         self.recursive_model = RecursiveGoldPredictor()
         self.direct_model = DirectGoldPredictor()
+
+        self.features = joblib.load("artifacts/feature_names.pkl")
+
+        self.recursive_model.features = self.features
+        self.direct_model.features = self.features
 
 # ---------------------------------------------------------------------------
     def train_model(self, model, model_path, X_train, y_train, X_val, y_val, epochs=300, batch_size=32, tune_epochs=80, tune_patience=10, patience=20):
@@ -98,7 +105,7 @@ class GoldPricePredictor:
         return result
 
 # ----------------------------------------------------------------------------
-    def predict_recursive(self, latest_data, historical_data, scaler_X, days=21):
+    def predict_recursive(self, latest_data, historical_data, scaler_X, days=30):
         return self.recursive_model.forecast(
             latest_data=latest_data,
             historical_data=historical_data,
@@ -113,14 +120,24 @@ class GoldPricePredictor:
             current_price=current_price
         )
 
-    def predict_gold(self, date, df, scaler_X):
+    def predict_gold(self, date, df, scaler_X, days=30):
         row = df.loc[pd.to_datetime(date)]
+
+        prediction_date = pd.to_datetime(date)
+        
+        dow = prediction_date.dayofweek
+        row["dow_sin"] = np.sin(2 * np.pi * dow / 7)
+        row["dow_cos"] = np.cos(2 * np.pi * dow / 7)
+
+        month = prediction_date.month
+        row["month_sin"] = np.sin(2 * np.pi * month / 12)
+        row["month_cos"] = np.cos(2 * np.pi * month / 12)
 
         recursive_result = self.predict_recursive(
             latest_data=row,
             historical_data=df.loc[:date],
             scaler_X=scaler_X,
-            days=21
+            days=days
         )
 
         direct_result = self.predict_direct(
