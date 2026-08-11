@@ -6,7 +6,9 @@ import joblib
 from models.GoldPricePredictor import GoldPricePredictor
 import os
 import kagglehub
-
+from pathlib import Path
+BASE_DIR = Path(__file__).resolve().parent
+ARTIFACTS_DIR = BASE_DIR / "artifacts"
 
 # ============================================================
 # Configuration
@@ -499,7 +501,7 @@ def load_data():
 @st.cache_resource
 def load_scaler():
 
-    SCALER_PATH = "artifacts/scaler_X.pkl"
+    SCALER_PATH = ARTIFACTS_DIR / "scaler_X.pkl"
 
     scaler_X = joblib.load(SCALER_PATH)
 
