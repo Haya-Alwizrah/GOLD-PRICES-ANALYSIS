@@ -1,5 +1,5 @@
 import pandas as pd
-from BaseGoldPredictor import BaseGoldPredictor
+from Final.models.BaseGoldPredictor import BaseGoldPredictor
 
 class DirectGoldPredictor(BaseGoldPredictor):
     TROY_OUNCE_GRAMS = 31.1034768

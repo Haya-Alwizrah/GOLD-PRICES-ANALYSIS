@@ -1,5 +1,5 @@
-from RecursiveGoldPredictor import RecursiveGoldPredictor
-from DirectGoldPredictor import DirectGoldPredictor
+from Final.models.RecursiveGoldPredictor import RecursiveGoldPredictor
+from Final.models.DirectGoldPredictor import DirectGoldPredictor
 
 class GoldPricePredictor:
     CONFIGS = [

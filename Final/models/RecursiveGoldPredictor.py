@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from BaseGoldPredictor import BaseGoldPredictor
+from Final.models.BaseGoldPredictor import BaseGoldPredictor
 
 class RecursiveGoldPredictor(BaseGoldPredictor):
     def __init__(self):
