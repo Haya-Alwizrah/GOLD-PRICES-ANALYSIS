@@ -159,3 +159,7 @@ class BaseGoldPredictor:
 
     def load(self, path):
         self.model = tf.keras.models.load_model(path)
+
+        history_path = f"checkpoints/{self.model_name.lower().replace(' ', '_')}_history.pkl"
+        with open(history_path, "rb") as f:
+            self.history = pickle.load(f)
