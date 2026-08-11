@@ -460,11 +460,7 @@ days = period_map[period]
 def load_predictor():
 
     predictor = GoldPricePredictor()
-
-    predictor.load_models(
-        recursive_path="artifacts/recursive_gold_model.keras",
-        direct_path="artifacts/direct_gold_model.keras"
-    )
+    predictor.load_models()
 
     return predictor
 
