@@ -3,6 +3,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import pickle
+from pathlib import Path
 SEED = 42
 tf.random.set_seed(SEED)
 np.random.seed(SEED)
@@ -15,6 +16,10 @@ class BaseGoldPredictor:
         self.best_config = None
         self.tuning_results = []
         self.model_name = model_name
+
+        self.BASE_DIR = Path(__file__).resolve().parent.parent
+        self.CHECKPOINTS_DIR = self.BASE_DIR / "checkpoints"
+        self.CHECKPOINTS_DIR.mkdir(exist_ok=True)
 
     def _build_model(self, input_shape, units1=128, units2=64, units3=32, dropout1=0.3, dropout2=0.2, l2reg=1e-3, lr=1e-3):
         model = tf.keras.Sequential([
@@ -94,7 +99,7 @@ class BaseGoldPredictor:
             ),
 
             tf.keras.callbacks.ModelCheckpoint(
-                f"checkpoints/best_{self.model_name.lower().replace(' ', '_')}_gold_model.keras",
+                self.CHECKPOINTS_DIR /f"best_{self.model_name.lower().replace(' ', '_')}_gold_model.keras",
                 monitor="val_loss",
                 save_best_only=True
             ),
@@ -119,7 +124,7 @@ class BaseGoldPredictor:
 
         self.history = history.history
 
-        history_path = (f"checkpoints/{self.model_name.lower().replace(' ', '_')}_history.pkl")
+        history_path = self.CHECKPOINTS_DIR /f"{self.model_name.lower().replace(' ', '_')}_history.pkl"
         with open(history_path, "wb") as f:
             pickle.dump(self.history, f)
 
@@ -160,6 +165,6 @@ class BaseGoldPredictor:
     def load(self, path):
         self.model = tf.keras.models.load_model(path)
 
-        history_path = f"checkpoints/{self.model_name.lower().replace(' ', '_')}_history.pkl"
+        history_path = self.CHECKPOINTS_DIR / f"{self.model_name.lower().replace(' ', '_')}_history.pkl"
         with open(history_path, "rb") as f:
             self.history = pickle.load(f)
