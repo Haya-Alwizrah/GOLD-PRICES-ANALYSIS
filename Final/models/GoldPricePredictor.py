@@ -6,6 +6,9 @@ import joblib
 import numpy as np
 
 class GoldPricePredictor:
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    ARTIFACTS_DIR = BASE_DIR / "artifacts"
+
     CONFIGS = [
         dict(
             units1=64,
@@ -49,7 +52,7 @@ class GoldPricePredictor:
         self.recursive_model = RecursiveGoldPredictor()
         self.direct_model = DirectGoldPredictor()
 
-        self.features = joblib.load("artifacts/feature_names.pkl")
+        self.features = joblib.load(self.ARTIFACTS_DIR / "feature_names.pkl")
 
         self.recursive_model.features = self.features
         self.direct_model.features = self.features
@@ -88,11 +91,13 @@ class GoldPricePredictor:
 
     def train_recursive(self, *args, **kwargs):
         print("Training Recursive Model")
-        self.train_model(self.recursive_model, "artifacts/recursive_gold_model.keras", *args, **kwargs)
+        model_path = self.ARTIFACTS_DIR / "recursive_gold_model.keras"
+        self.train_model(self.recursive_model, str(model_path), *args, **kwargs)
 
     def train_direct(self, *args, **kwargs):
         print("Training Direct Model")
-        self.train_model(self.direct_model, "artifacts/direct_gold_model.keras", *args, **kwargs)
+        model_path = self.ARTIFACTS_DIR / "direct_gold_model.keras"
+        self.train_model(self.direct_model, str(model_path), *args, **kwargs)
 
 # ----------------------------------------------------------------------------
 
@@ -152,14 +157,25 @@ class GoldPricePredictor:
         }
     
 # ----------------------------------------------------------------------------
-    def load_models(self, recursive_path="artifacts/recursive_gold_model.keras", direct_path="artifacts/direct_gold_model.keras"):
-        self.recursive_model.load(recursive_path)
-        self.direct_model.load(direct_path)
+    def load_models(self, recursive_path=None, direct_path=None):
+        if recursive_path is None:
+            recursive_path = self.ARTIFACTS_DIR / "recursive_gold_model.keras"
+
+        if direct_path is None:
+            direct_path = self.ARTIFACTS_DIR / "direct_gold_model.keras"
+
+        self.recursive_model.load(str(recursive_path))
+        self.direct_model.load(str(direct_path))
         print("Models loaded successfully.")
 
 
-    def save_models(self, recursive_path="artifacts/recursive_gold_model.keras", direct_path="artifacts/direct_gold_model.keras"):
-        self.recursive_model.save(recursive_path)
-        self.direct_model.save(direct_path)
+    def save_models(self, recursive_path=None, direct_path=None):
+        if recursive_path is None:
+            recursive_path = self.ARTIFACTS_DIR / "recursive_gold_model.keras"
 
-        print("Models saved successfully.") 
+        if direct_path is None:
+            direct_path = self.ARTIFACTS_DIR / "direct_gold_model.keras"
+
+        self.recursive_model.save(str(recursive_path))
+        self.direct_model.save(str(direct_path))
+        print("Models saved successfully.")
