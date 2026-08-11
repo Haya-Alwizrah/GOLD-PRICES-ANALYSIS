@@ -412,7 +412,6 @@ st.markdown(
 st.markdown(
     """
     <div class="hero">
-        <div class="hero-icon">🪙</div>
         <div class="hero-title">Gold Price Forecast</div>
         <div class="hero-subtitle">AI-powered gold price prediction based on historical market data</div>
     </div>
@@ -439,9 +438,13 @@ with col2:
         index=1
     )
 
-    st.markdown(
-        "</div>",
-        unsafe_allow_html=True
+    MAX_PREDICTION_DATE = pd.to_datetime("2026-07-01").date()
+
+    prediction_date = st.date_input(
+        "Prediction Start Date",
+        value=MAX_PREDICTION_DATE,
+        min_value=pd.to_datetime("2000-10-18").date(),
+        max_value=MAX_PREDICTION_DATE
     )
 
 
@@ -507,7 +510,6 @@ def load_scaler():
 
     return scaler_X
 
-
 # ============================================================
 # Prediction
 # ============================================================
@@ -525,23 +527,21 @@ if st.button(
 
             df = load_data()
 
-            scaler_X = load_scaler()
+            prediction_date = pd.to_datetime(prediction_date)
 
-            prediction_date = pd.to_datetime(
-                PREDICTION_DATE
-            )
+            scaler_X = load_scaler()
 
             if prediction_date not in df.index:
 
                 st.error(
-                    f"Prediction date {PREDICTION_DATE} "
+                    f"Prediction date {prediction_date.date()} "
                     "was not found in the dataset."
                 )
 
                 st.stop()
 
             result = predictor.predict_gold(
-                date=PREDICTION_DATE,
+                date=prediction_date.strftime("%Y-%m-%d"),
                 df=df,
                 scaler_X=scaler_X,
                 days=days
